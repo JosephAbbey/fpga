@@ -16,47 +16,64 @@ end entity;
 
 library ieee;
   use ieee.std_logic_1164.all;
+  use ieee.numeric_std.all;
 library local;
-  use local.testbench_pkg.all;
 
 architecture rtl of test_time_display is
 
-  signal clk   : std_logic := '0';
-  signal digit : work.sevseg_pkg.digits_t;
-  signal disp  : work.sevseg_pkg.time_disp_t;
-  signal am    : std_logic := '0';
-  signal pm    : std_logic := '0';
-  signal alarm : std_logic := '0';
+  signal disp        : work.sevseg_pkg.time_disp_t;
+  signal digit       : work.sevseg_pkg.digits_t;
+  signal am          : std_logic;
+  signal pm          : std_logic;
+  signal alarm       : std_logic;
+  signal tfhr        : std_logic := '0';
+  signal mode        : work.time_display_pkg.mode_t;
+  signal silence     : std_logic := '0';
+  signal up          : std_logic := '0';
+  signal down        : std_logic := '0';
+  signal ok          : std_logic := '0';
+
+  signal Clk              : std_logic;
+  constant ClkPeriod      : time                                    := 250 ms; -- 10 ns;
+  constant ClkFrequencyHz : integer                                 := 1000 ms / ClkPeriod; -- 10 Hz
+  signal   ticks          : integer range 0 to (ClkFrequencyHz - 1) := 0;
+
+  function To_Std_Logic(L: boolean) return std_ulogic is
+  begin
+      if L then
+          return('1');
+      else
+          return('0');
+      end if;
+  end function;
 
 begin
 
-  clkgen : clock(clk, 10 ns);
+  clkgen : local.testbench_pkg.clock(Clk, ClkPeriod);
+
+  process(Clk) is
+  begin
+    if rising_edge(Clk) then
+      ticks <= (ticks + 1) mod ClkFrequencyHz;
+    end if;
+  end process;
 
   comp_time_display : entity work.time_display
     port map (
-      digit => digit,
-      disp  => disp
+      Clk     => Clk,
+      PPS     => To_Std_Logic(ticks = 0),
+
+      disp    => disp,
+      digit   => digit,
+      am      => am,
+      pm      => pm,
+      alarm   => alarm,
+      tfhr    => tfhr,
+      mode    => mode,
+      silence => silence,
+      up      => up,
+      down    => down,
+      ok      => ok
     );
-
-  process
-  begin
-    digit           <= (0, 1, 2, 3);
-    (am, alarm, pm) <= std_logic_vector'("100");
-    wait_nr_ticks(clk, 1);
-
-    for i in 0 to 15 loop
-      digit <= (
-        (digit(0)+1) mod 16,
-        (digit(1)+1) mod 16,
-        (digit(2)+1) mod 16,
-        (digit(3)+1) mod 16
-      );
-      (am, alarm, pm) <= std_logic_vector'(pm, am, alarm);
-      wait_nr_ticks(clk, 1);
-    end loop;
-
-    stop_clocks;
-    wait;
-  end process;
 
 end architecture;

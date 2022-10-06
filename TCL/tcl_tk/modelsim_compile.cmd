@@ -32,7 +32,9 @@ vmap local %SIM%\libraries\local
 vlib work
 vcom -quiet -2008 ^
   %SRC%\sevseg_pkg.vhdl ^
+  %SRC%\time_display_pkg.vhdl ^
   %SRC%\sevseg_decode.vhdl ^
+  %SRC%\nice_time.vhdl ^
   %SRC%\time_display.vhdl ^
   %SRC%\test_time_display.vhdl
 set ec=%ERRORLEVEL%

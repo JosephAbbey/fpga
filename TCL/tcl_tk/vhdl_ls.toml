@@ -1,0 +1,7 @@
+[libraries]
+local.files = [
+  "../../VHDL/Local/*.vhdl"
+]
+work.files = [
+  "*.vhdl"
+]

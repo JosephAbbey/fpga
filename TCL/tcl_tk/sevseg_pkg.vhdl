@@ -17,7 +17,9 @@ library ieee;
 
 package sevseg_pkg is
 
-  type digits_t    is array (0 to 3) of integer range 0 to 15;
-  type time_disp_t is array (0 to 3) of std_logic_vector(6 downto 0);
+  subtype digit_t         is integer range 0 to 15;
+  subtype one_time_disp_t is std_logic_vector(6 downto 0);
+  type digits_t           is array (0 to 3) of digit_t;
+  type time_disp_t        is array (0 to 3) of one_time_disp_t;
 
 end package;
